@@ -1,8 +1,8 @@
 // DeVote - Decentralized Voting App
 import { ethers } from "https://esm.sh/ethers@6.13.1";
 
-// CONFIG: Paste your contract address and ABI from Remix here
-const CONTRACT_ADDRESS = ""; // <-- REPLACE with your deployed contract address
+// CONFIG: Paste the address of your Voting contract deployed on Sepolia here.
+const CONTRACT_ADDRESS = "0xb421adA4A33443cFFB3B5cD58Ce484711cb31FD7";
 const ABI = [
 		{
 			"inputs": [
@@ -14,6 +14,19 @@ const ABI = [
 			],
 			"stateMutability": "nonpayable",
 			"type": "constructor"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "candidateIndex",
+					"type": "uint256"
+				}
+			],
+			"name": "vote",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
 		},
 		{
 			"anonymous": false,
@@ -146,22 +159,8 @@ const ABI = [
 			],
 			"stateMutability": "view",
 			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "uint256",
-					"name": "candidateIndex",
-					"type": "uint256"
-				}
-			],
-			"name": "vote",
-			"outputs": [],
-			"stateMutability": "nonpayable",
-			"type": "function"
 		}
 	];
-
 // Global state
 let provider = null;
 let signer = null;
@@ -184,13 +183,15 @@ const footerAddress = document.getElementById("footerAddress");
 // Initialize on page load
 (function init() {
   if (!window.ethereum) {
-    alert("🦊 MetaMask not detected!\n\nPlease install MetaMask: https://metamask.io");
+    alert(
+      "🦊 MetaMask not detected!\n\nPlease install MetaMask: https://metamask.io",
+    );
     connectBtn.textContent = "MetaMask Required";
     connectBtn.disabled = true;
   }
-  footerAddress.textContent = CONTRACT_ADDRESS === "0x42E8FA6470AFabaD8be4bCF14A8f6cb29f49E14c"
-    ? "Paste your Sepolia contract address in app.js"
-    : CONTRACT_ADDRESS;
+  footerAddress.textContent = ethers.isAddress(CONTRACT_ADDRESS)
+    ? CONTRACT_ADDRESS
+    : "Paste your Sepolia contract address in app.js";
 })();
 
 // Connect wallet and load contract
@@ -200,16 +201,39 @@ window.connectWallet = async function () {
     await provider.send("eth_requestAccounts", []);
     signer = await provider.getSigner();
     userAddress = await signer.getAddress();
-// Check network using MetaMask directly
-const chainId = await window.ethereum.request({
-  method: "eth_chainId",
-});
+    // Check network using MetaMask directly
+    const chainId = await window.ethereum.request({
+      method: "eth_chainId",
+    });
 
-// Sepolia chainId in HEX = 0xaa36a7
-if (chainId !== "0xaa36a7") {
-  showStatus("error", "⚠️", "Please switch to Sepolia testnet in MetaMask!");
-  return;
-}
+    // Sepolia chainId in HEX = 0xaa36a7
+    if (chainId !== "0xaa36a7") {
+      showStatus(
+        "error",
+        "⚠️",
+        "Please switch to Sepolia testnet in MetaMask!",
+      );
+      return;
+    }
+
+    if (!ethers.isAddress(CONTRACT_ADDRESS)) {
+      showStatus(
+        "error",
+        "⚙️",
+        "Set a valid Sepolia contract address in app.js.",
+      );
+      return;
+    }
+
+    const deployedCode = await provider.getCode(CONTRACT_ADDRESS);
+    if (deployedCode === "0x") {
+      showStatus(
+        "error",
+        "⚙️",
+        "No contract was found at this address on Sepolia. Check the deployed contract address.",
+      );
+      return;
+    }
 
     contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, provider);
     // console.log("Contract loaded at:", contract);
@@ -241,7 +265,10 @@ async function loadCandidates() {
   try {
     const candidates = await contract.getCandidates();
     const alreadyVoted = await contract.checkIfVoted(userAddress);
-    const totalVotes = candidates.reduce((sum, c) => sum + Number(c.voteCount), 0);
+    const totalVotes = candidates.reduce(
+      (sum, c) => sum + Number(c.voteCount),
+      0,
+    );
 
     loadingState.classList.add("hidden");
     candidatesGrid.classList.remove("hidden");
@@ -250,8 +277,12 @@ async function loadCandidates() {
   } catch (err) {
     console.error("loadCandidates error:", err);
     loadingState.classList.add("hidden");
-    if (CONTRACT_ADDRESS === "0x42E8FA6470AFabaD8be4bCF14A8f6cb29f49E14c") {
-      showStatus("error", "⚙️", "Contract address not set - check app.js");
+    if (err.code === "BAD_DATA" && err.info?.method === "getCandidates") {
+      showStatus(
+        "error",
+        "⚙️",
+        "This contract does not implement getCandidates(). Deploy the current Voting.sol on Sepolia and use that contract address.",
+      );
     } else {
       showStatus("error", "❌", "Failed to load candidates: " + err.message);
     }
@@ -339,7 +370,9 @@ function hideStatus() {
 }
 
 function setVoteButtonsDisabled(disabled) {
-  document.querySelectorAll(".btn-vote").forEach(btn => btn.disabled = disabled);
+  document
+    .querySelectorAll(".btn-vote")
+    .forEach((btn) => (btn.disabled = disabled));
 }
 
 function truncateAddress(address) {
