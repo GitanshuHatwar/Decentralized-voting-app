@@ -1,77 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DeVote — Decentralized Voting</title>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
-</head>
-<body>
-  <!-- Grid background -->
-  <div class="grid-bg" aria-hidden="true"></div>
-
-  <!-- Header -->
-  <header class="site-header">
-    <div class="logo">
-      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-        <path d="M10 18L18 10" stroke="#00ffe0" stroke-width="2" stroke-linecap="round"/>
-        <rect x="3" y="13" width="8" height="8" rx="4" stroke="#00ffe0" stroke-width="2"/>
-        <rect x="17" y="7" width="8" height="8" rx="4" stroke="#a78bfa" stroke-width="2"/>
-      </svg>
-      <span>De<strong>Vote</strong></span>
-    </div>
-
-    <div class="wallet-area">
-      <button id="connectBtn" class="btn-connect">Connect Wallet</button>
-      <div id="walletInfo" class="wallet-info hidden">
-        <span class="wallet-dot"></span>
-        <span id="walletAddress" class="wallet-address">0x000...0000</span>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DeVote — Decentralized Voting</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#top"><span class="brand-mark">V</span><span>DeVote</span></a>
+      <div class="wallet-area">
+        <button id="connectBtn" class="button">Connect wallet</button>
+        <div id="walletInfo" class="wallet-info hidden"><span class="wallet-dot"></span><span id="walletAddress">0x000...0000</span></div>
       </div>
-    </div>
-  </header>
-
-  <!-- Hero -->
-  <section class="hero">
-    <p class="hero-tag">// Sepolia Testnet</p>
-    <h1 class="hero-title">Cast Your Vote<br /><em>On-Chain.</em></h1>
-    <p class="hero-sub">
-      Transparent. Tamper-proof. Trustless.<br />
-      Connect your MetaMask wallet and make your voice heard forever.
-    </p>
-  </section>
-
-  <!-- Status bar for feedback -->
-  <div id="statusBar" class="status-bar hidden" role="status" aria-live="polite">
-    <span id="statusIcon" class="status-icon">⏳</span>
-    <span id="statusMsg">Status message here</span>
-  </div>
-
-  <!-- Candidates -->
-  <main class="main-content">
-    <!-- Before wallet connected -->
-    <div id="connectPrompt" class="connect-prompt">
-      <div class="prompt-icon">🔗</div>
-      <p>Connect your wallet to view candidates and vote</p>
-    </div>
-
-    <!-- Loading state -->
-    <div id="loadingState" class="loading-state hidden">
-      <div class="spinner"></div>
-      <p>Reading from blockchain...</p>
-    </div>
-
-    <!-- Candidates grid (populated by app.js) -->
-    <div id="candidatesGrid" class="candidates-grid hidden"></div>
-  </main>
-
-  <!-- Footer -->
-  <footer class="site-footer">
-    <p>Powered by <a href="https://ethereum.org" target="_blank" rel="noopener">Ethereum</a> &amp; Ethers.js v6</p>
-    <p class="footer-contract">Contract: <span id="footerAddress" class="mono">Not deployed yet</span></p>
-  </footer>
-
-  <script type="module" src="app.js"></script>
-</body>
+    </header>
+    <main id="top">
+      <section class="hero">
+        <p class="eyebrow">Sepolia testnet</p>
+        <h1>Your vote,<br /><em>on-chain.</em></h1>
+        <p>Connect your wallet, choose a candidate, and follow the result as it changes on the blockchain.</p>
+      </section>
+      <div id="statusBar" class="status-bar hidden" role="status" aria-live="polite"><span id="statusIcon"></span><span id="statusMsg"></span></div>
+      <section class="vote-section" aria-labelledby="voteTitle">
+        <div class="section-heading"><div><p class="eyebrow">Live ballot</p><h2 id="voteTitle">Choose a candidate</h2></div><span class="live-label"><i></i> Live results</span></div>
+        <div id="connectPrompt" class="connect-prompt"><span class="prompt-icon">↗</span><h3>Connect to view the ballot</h3><p>Your wallet is used only to submit your vote.</p></div>
+        <div id="loadingState" class="loading-state hidden"><span class="spinner"></span><p>Loading candidates...</p></div>
+        <div id="candidatesGrid" class="candidates-grid hidden"></div>
+      </section>
+    </main>
+    <footer class="site-footer"><span>DeVote</span><span>Powered by Ethereum · Ethers.js</span><span>Contract: <strong id="footerAddress">Not configured</strong></span></footer>
+    <script type="module" src="app.js"></script>
+  </body>
 </html>
